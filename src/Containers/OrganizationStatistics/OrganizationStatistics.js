@@ -119,6 +119,10 @@ const OrganizationStatistics = () => {
     };
 
     useEffect(() => {
+        insights.chrome.appNavClick({ id: 'organization-statistics', secondaryNav: true });
+    }, []);
+
+    useEffect(() => {
         let ignore = false;
         const fetchEndpoints = () => {
             return Promise.all([

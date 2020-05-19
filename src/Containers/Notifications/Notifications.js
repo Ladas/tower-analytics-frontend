@@ -165,6 +165,8 @@ const Notifications = () => {
     }, [ queryParams ]);
 
     useEffect(() => {
+        insights.chrome.appNavClick({ id: 'notifications', secondaryNav: true });
+
         let ignore = false;
         const fetchEndpoints = () => {
             return Promise.all(

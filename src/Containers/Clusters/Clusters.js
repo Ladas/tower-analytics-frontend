@@ -150,6 +150,8 @@ const Clusters = () => {
     }, [ queryParams ]);
 
     useEffect(() => {
+        insights.chrome.appNavClick({ id: 'clusters', secondaryNav: true });
+
         let ignore = false;
         const getData = () => {
             return Promise.all(

@@ -239,6 +239,10 @@ export const useAutomationFormula = () => {
     const { formatData } = automationCalculatorMethods();
 
     useEffect(() => {
+        insights.chrome.appNavClick({ id: 'automation-calculator', secondaryNav: true });
+    }, []);
+
+    useEffect(() => {
         let ignore = false;
         const getData = () => {
             return readROI({ params: {}});
