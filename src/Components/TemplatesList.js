@@ -87,20 +87,6 @@ const formatTopFailedTask = data => {
     return `Unavailable`;
 };
 
-const renderTemplateTitle = ({ name, type }) => {
-    let context;
-    if (type === 'job') {
-        context = 'Playbook Run';
-    }
-
-    return (
-        <>
-            { name }
-            <Badge style={ { marginLeft: '20px' } } isRead>{ context }</Badge>
-        </>
-    );
-};
-
 const TemplatesList = ({ templates, isLoading, queryParams }) => {
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ selectedId, setSelectedId ] = useState(null);
@@ -137,12 +123,10 @@ const TemplatesList = ({ templates, isLoading, queryParams }) => {
       } }>
           <DataListItem aria-labelledby="top-templates-header">
               <DataListCell>
-                  <h3>Top Templates</h3>
+                  <h3>Top templates</h3>
               </DataListCell>
               <DataCellEnd>
-                  <h3>
-                      <strong>Usage</strong>
-                  </h3>
+                  <h3>Usage</h3>
               </DataCellEnd>
           </DataListItem>
           { isLoading && (
@@ -186,10 +170,10 @@ const TemplatesList = ({ templates, isLoading, queryParams }) => {
               </DataListItem>
           )) }
       </DataList>
-      {selectedTemplate && (
+      { selectedTemplate && (
           <Modal
               width={ '80%' }
-              title={ selectedTemplate.name ? renderTemplateTitle(selectedTemplate) : '' }
+              title={ selectedTemplate.name ? selectedTemplate.name : '' }
               isOpen={ isModalOpen }
               onClose={ () => {
                   setIsModalOpen(false);
@@ -279,14 +263,15 @@ const TemplatesList = ({ templates, isLoading, queryParams }) => {
               )) }
               </DataList>
           </Modal>
-      )}
+      ) }
     </>
     );
 };
 
 TemplatesList.propTypes = {
     templates: PropTypes.array,
-    isLoading: PropTypes.bool
+    isLoading: PropTypes.bool,
+    queryParams: PropTypes.object
 };
 
 export default TemplatesList;
