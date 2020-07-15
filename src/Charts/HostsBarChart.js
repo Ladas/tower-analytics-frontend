@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import initializeChart from './BaseChart';
 import * as d3 from 'd3';
 import Legend from '../Utilities/Legend';
-import { pfmulti } from '../Utilities/colors';
+import { getColorForNames } from '../Utilities/colors';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
@@ -12,8 +12,6 @@ const Wrapper = styled.div`
   flex-wrap: nowrap;
   flex-shrink: 0;
 `;
-
-const color = d3.scaleOrdinal(pfmulti);
 
 class Tooltip {
     constructor(props) {
@@ -168,7 +166,8 @@ class HostsBarChart extends Component {
             colors: [],
             selected: [],
             formattedData: [],
-            timeout: null
+            timeout: null,
+            colorToNames: getColorForNames(this.orgsList.map(el => ({ name: el.name })))
         };
     }
 
@@ -193,6 +192,7 @@ class HostsBarChart extends Component {
     }
 
     init() {
+        const { colorToNames } = this.state;
         // create the first 8 selected data points
         if (this.selection.length === 0) {
             this.orgsList.forEach((org, index) => {
@@ -202,20 +202,13 @@ class HostsBarChart extends Component {
             });
         }
 
-        // create our colors array to send to the Legend component
-        const colors = this.orgsList.reduce((colors, org) => {
-            colors.push({
-                name: org.name,
-                value: color(org.name),
-                id: org.id
-            });
-            return colors;
-        }, []);
-        this.setState({ colors });
+        const legend = this.orgsList.map(el => ({ name: el.name, value: colorToNames[el.name], id: el.id }));
+        this.setState({ colors: legend });
         this.draw();
     }
 
     draw() {
+        const { colorToNames } = this.state;
         // Clear our chart container element first
         d3.selectAll('#' + this.props.id + ' > *').remove();
         let { data: unformattedData, timeFrame } = this.props;
@@ -348,7 +341,7 @@ class HostsBarChart extends Component {
             return x1(d.name);
         }) // unsorted
         .style('fill', function(d) {
-            return color(d.name);
+            return colorToNames[d.name];
         })
         .attr('y', function(d) {
             return y(d.count);
@@ -357,12 +350,12 @@ class HostsBarChart extends Component {
             return height - y(d.count);
         })
         .on('mouseover', function(d) {
-            d3.select(this).style('fill', d3.rgb(color(d.name)).darker(1));
+            d3.select(this).style('fill', d3.rgb(colorToNames[d.name]).darker(1));
             tooltip.handleMouseOver();
         })
         .on('mousemove', tooltip.handleMouseOver)
         .on('mouseout', function(d) {
-            d3.select(this).style('fill', color(d.name));
+            d3.select(this).style('fill', colorToNames[d.name]);
             tooltip.handleMouseOut();
         });
         bars = bars.merge(subEnter);

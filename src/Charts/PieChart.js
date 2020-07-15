@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import initializeChart from './BaseChart';
 import { getTotal } from '../Utilities/helpers';
 import Legend from '../Utilities/Legend';
-import { pfmulti } from '../Utilities/colors';
+import { getColorForNames } from '../Utilities/colors';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
@@ -169,7 +169,8 @@ class PieChart extends Component {
         super(props);
         this.state = {
             colors: [],
-            timeout: null
+            timeout: null,
+            colorToNames: getColorForNames(props.data)
         };
         this.draw = this.draw.bind(this);
         this.init = this.init.bind(this);
@@ -191,32 +192,13 @@ class PieChart extends Component {
     }
     init() {
         const { data } = this.props;
-        const color = d3.scaleOrdinal(pfmulti);
-        // create our colors array to send to the Legend component
-        const colors = data.reduce((colors, org) => {
-            // format complement slice as "Others"
-            if (org.id === -1) {
-                colors.push({
-                    name: 'Others',
-                    value: color(org.name),
-                    count: Math.round(org.count)
-                });
-            } else {
-                colors.push({
-                    name: org.name,
-                    value: color(org.name),
-                    count: Math.round(org.count)
-                });
-            }
-
-            return colors;
-        }, []);
-        this.setState({ colors });
+        const { colorToNames } = this.state;
+        const legend = data.map(el => ({ name: el.name, value: colorToNames[el.name], count: Math.round(el.count) }));
+        this.setState({ colors: legend.sort((a, b) => (a.count > b.count) ? -1 : ((b.count > a.count) ? 1 : 0)) });
         this.draw();
     }
     draw() {
-        const color = d3.scaleOrdinal(pfmulti);
-
+        const { colorToNames } = this.state;
         d3.selectAll('#' + this.props.id + ' > *').remove();
         const width = this.props.getWidth();
         const height = this.props.getHeight();
@@ -265,16 +247,16 @@ class PieChart extends Component {
         .enter()
         .append('path')
         .attr('d', arc)
-        .attr('fill', (d, i) => color(i));
+        .attr('fill', (d) => colorToNames[d.data.name]);
 
         svg
         .selectAll('path')
-        .on('mouseover', function(d, i) {
-            d3.select(this).style('fill', d3.rgb(color(i)).darker(1));
+        .on('mouseover', function(d) {
+            d3.select(this).style('fill', d3.rgb(colorToNames[d.data.name]).darker(1));
             donutTooltip.handleMouseOver(d);
         })
-        .on('mouseout', function(d, i) {
-            d3.select(this).style('fill', color(i));
+        .on('mouseout', function(d) {
+            d3.select(this).style('fill', colorToNames[d.data.name]);
             donutTooltip.handleMouseOut();
         })
         .on('mousemove', donutTooltip.handleMouseOver);
